@@ -2,6 +2,8 @@
 
 namespace App\Services\PointCalculator;
 
+use App\Exceptions\NotEnoughPerCentCalculatorException;
+use App\Exceptions\RequiredSubjectCalculatorException;
 use Exception;
 
 final readonly class BasePointCalculator extends AbstractPointCalculator
@@ -54,13 +56,13 @@ final readonly class BasePointCalculator extends AbstractPointCalculator
 
         foreach ($eredmenyek as $eredmeny) {
             if((int) $eredmeny->eredmeny < 20) {
-                throw new Exception;
+                throw new NotEnoughPerCentCalculatorException(__('not_enough_per_cent_in_subject'));
             }
         }
 
         foreach(self::kotelezok as $kotelezo) {
             if(!$eredmenyek->where('nev', $kotelezo)->count()) {
-                throw new Exception;
+                throw new RequiredSubjectCalculatorException(__('required_subject'));
             }
         }
 
@@ -75,7 +77,7 @@ final readonly class BasePointCalculator extends AbstractPointCalculator
             }
 
             if(!$eredmenyek->where('nev', $targy)->whereIn('tipus', $szintek)->count()) {
-                throw new Exception;
+                throw new RequiredSubjectCalculatorException(__('required_subject'));
             }
 
             $alappont += (int) ($eredmenyek->where('nev', $targy)->whereIn('tipus', $szintek)->first()->eredmeny);
@@ -103,7 +105,7 @@ final readonly class BasePointCalculator extends AbstractPointCalculator
         }
 
         if (!$vanLegalabbEgyValasztott) {
-            throw new Exception;
+            throw new RequiredSubjectCalculatorException(__('required_optional_subject'));
         }
 
         return 2 * ($alappont + $legjobb);

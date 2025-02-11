@@ -9,7 +9,7 @@ use Tests\TestCase;
 class ExtraPointCalculatorTest extends TestCase
 {
     /**
-     * Test the base point calculation.
+     * Test the extra point calculation.
      */
     public function test_correct_extra_point_calculator(): void
     {
@@ -32,7 +32,7 @@ class ExtraPointCalculatorTest extends TestCase
                 ],
                 [
                     'nev' => 'matematika',
-                    'tipus' => 'emelt',
+                    'tipus' => 'közép',
                     'eredmeny' => '90%',
                 ],
                 [
@@ -55,18 +55,18 @@ class ExtraPointCalculatorTest extends TestCase
                 [
                     'kategoria' => 'Nyelvvizsga',
                     'tipus' => 'C1',
-                    'nyelv' => 'német',
+                    'nyelv' => 'angol',
                 ],
             ],
         ];
 
         $calculator = new ExtraPointCalculator();
         $result = $calculator->calculate($exampleData);
-        $this->assertEquals(100, $result);
+        $this->assertEquals(40, $result);
     }
 
     /**
-     * Test the base point calculation.
+     * Test the extra point calculation.
      */
     public function test_other_correct_extra_point_calculator(): void
     {
@@ -89,7 +89,7 @@ class ExtraPointCalculatorTest extends TestCase
                 ],
                 [
                     'nev' => 'matematika',
-                    'tipus' => 'emelt',
+                    'tipus' => 'közép',
                     'eredmeny' => '90%',
                 ],
                 [
@@ -117,13 +117,13 @@ class ExtraPointCalculatorTest extends TestCase
                 [
                     'kategoria' => 'Nyelvvizsga',
                     'tipus' => 'C1',
-                    'nyelv' => 'német',
+                    'nyelv' => 'angol',
                 ],
             ],
         ];
 
         $calculator = new ExtraPointCalculator();
         $result = $calculator->calculate($exampleData);
-        $this->assertEquals(100, $result);
+        $this->assertEquals(40, $result);
     }
 }

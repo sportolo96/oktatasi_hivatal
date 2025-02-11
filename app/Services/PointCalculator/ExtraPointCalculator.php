@@ -6,11 +6,6 @@ final readonly class ExtraPointCalculator extends AbstractPointCalculator
 {
     public function calculate(array $data): int
     {
-        $results = json_encode($data['valasztott-szak']);
-        $results = json_decode($results);
-
-        $szak = collect($results, true);
-
         $results = json_encode($data['erettsegi-eredmenyek']);
         $results = json_decode($results);
 

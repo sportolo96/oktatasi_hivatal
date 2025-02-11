@@ -8,7 +8,7 @@ use Tests\TestCase;
 class PointCalculatorTest extends TestCase
 {
     /**
-     * Test the base point calculation.
+     * Test the full point calculation.
      */
     public function test_correct_point_calculator(): void
     {
@@ -65,7 +65,7 @@ class PointCalculatorTest extends TestCase
     }
 
     /**
-     * Test the base point calculation.
+     * Test the full point calculation.
      */
     public function test_other_correct_point_calculator(): void
     {
