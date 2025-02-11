@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Services\PointCalculator\BasePointCalculator;
 use App\Services\PointCalculator\ExtraPointCalculator;
+use App\ValueObject\Input\InputVO;
 use Tests\TestCase;
 
 class ExtraPointCalculatorTest extends TestCase
@@ -61,7 +61,9 @@ class ExtraPointCalculatorTest extends TestCase
         ];
 
         $calculator = new ExtraPointCalculator();
-        $result = $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $result = $calculator->calculate($input);
+
         $this->assertEquals(40, $result);
     }
 
@@ -123,7 +125,9 @@ class ExtraPointCalculatorTest extends TestCase
         ];
 
         $calculator = new ExtraPointCalculator();
-        $result = $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $result = $calculator->calculate($input);
+
         $this->assertEquals(40, $result);
     }
 }

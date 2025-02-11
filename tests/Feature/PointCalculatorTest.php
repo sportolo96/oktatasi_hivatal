@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\AbstractCalculatorException;
 use App\Services\PointCalculator\PointCalculator;
+use App\ValueObject\Input\InputVO;
 use Tests\TestCase;
 
 class PointCalculatorTest extends TestCase
 {
     /**
      * Test the full point calculation.
+     * @throws AbstractCalculatorException
      */
     public function test_correct_point_calculator(): void
     {
@@ -60,12 +63,15 @@ class PointCalculatorTest extends TestCase
         ];
 
         $calculator = new PointCalculator();
-        $result = $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $result = $calculator->calculate($input);
+
         $this->assertEquals(470, $result);
     }
 
     /**
      * Test the full point calculation.
+     * @throws AbstractCalculatorException
      */
     public function test_other_correct_point_calculator(): void
     {
@@ -122,7 +128,9 @@ class PointCalculatorTest extends TestCase
         ];
 
         $calculator = new PointCalculator();
-        $result = $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $result = $calculator->calculate($input);
+
         $this->assertEquals(476, $result);
     }
 }

@@ -2,7 +2,10 @@
 
 namespace App\Services\PointCalculator;
 
-final readonly class PointCalculator extends AbstractPointCalculator
+use App\Exceptions\AbstractCalculatorException;
+use App\ValueObject\Input\InputVO;
+
+final readonly class PointCalculator implements PointCalculatorInterface
 {
     private BasePointCalculator $basePointCalculator;
     private ExtraPointCalculator $extraPointCalculator;
@@ -13,10 +16,13 @@ final readonly class PointCalculator extends AbstractPointCalculator
         $this->extraPointCalculator = new ExtraPointCalculator();
     }
 
-    public function calculate(array $data): int
+    /**
+     * @throws AbstractCalculatorException|\Exception
+     */
+    public function calculate(InputVO $input): int
     {
-        $basePoints = $this->basePointCalculator->calculate($data);
-        $extraPoints = $this->extraPointCalculator->calculate($data);
+        $basePoints = $this->basePointCalculator->calculate($input);
+        $extraPoints = $this->extraPointCalculator->calculate($input);
 
         return $basePoints + $extraPoints;
     }

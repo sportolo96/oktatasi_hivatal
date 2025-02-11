@@ -2,112 +2,113 @@
 
 namespace App\Services\PointCalculator;
 
+use App\Collection\Level\SubjectLevelEnumerationCollection;
+use App\Collection\Subject\SubjectVOCollection;
+use App\Enumerations\SubjectLevel;
+use App\Exceptions\AbstractCalculatorException;
 use App\Exceptions\NotEnoughPerCentCalculatorException;
 use App\Exceptions\RequiredSubjectCalculatorException;
+use App\Repositories\SubjectRepository;
+use App\Services\DataProviderService;
+use App\ValueObject\Input\InputVO;
+use App\ValueObject\RequirementsVO;
 use Exception;
 
-final readonly class BasePointCalculator extends AbstractPointCalculator
+final readonly class BasePointCalculator implements PointCalculatorInterface
 {
-    const kovetelmenyek = [
-        'ELTE' => [
-            'IK' => [
-                'Programtervező informatikus' => [
-                    'kotelezo' => ['matematika' => 'közép'],
-                    'kotelezoen_valaszthato' => [
-                        'informatika' => 'közép', 'biológia' => 'közép', 'fizika' => 'közép', 'kémia' => 'közép'
-                    ],
-                ]
-            ]
-        ],
-        'PPKE' => [
-            'BTK' => [
-                'Anglisztika' => [
-                    'kotelezo' => ['angol' => 'emelt'],
-                    'kotelezoen_valaszthato' => [
-                        ['francia' => 'közép'], ['német' => 'közép'], ['olasz' => 'közép'], ['orosz' => 'közép'], ['spanyol' => 'közép'], ['történelem' => 'közép']
-                    ],
-                ]
-            ]
-        ]
-    ];
+    protected DataProviderService $dataProviderService;
+    protected SubjectRepository $subjectRepository;
 
-    const kotelezok = [
-        'magyar nyelv és irodalom',
-        'történelem',
-        'matematika',
-    ];
+    public function __construct()
+    {
+        $this->dataProviderService = new DataProviderService();
+        $this->subjectRepository = new SubjectRepository();
+    }
 
     /**
-     * @throws Exception
+     * @throws AbstractCalculatorException|\Exception
      */
-    public function calculate(array $data): int
+    public function calculate(InputVO $input): int
     {
-        $results = json_encode($data['valasztott-szak']);
-        $results = json_decode($results);
+        $selectedMajor = $input->getSelectedMajor();
+        $results = $input->getResult()?->getResult();
 
-        $szak = collect($results, true);
+        $requirements = $this->dataProviderService->getRequirement($selectedMajor->getUniversityName(), $selectedMajor->getInstitutionName(), $selectedMajor->getMajorName());
 
-        $targyak = self::kovetelmenyek[$szak['egyetem']][$szak['kar']][$szak['szak']];
-
-        $results = json_encode($data['erettsegi-eredmenyek']);
-        $results = json_decode($results);
-
-        $eredmenyek = collect($results, true);
-
-        foreach ($eredmenyek as $eredmeny) {
-            if((int) $eredmeny->eredmeny < 20) {
+        foreach ($results as $subject) {
+            if ($subject->getPercent() < 20) {
                 throw new NotEnoughPerCentCalculatorException(__('not_enough_per_cent_in_subject'));
             }
         }
 
-        foreach(self::kotelezok as $kotelezo) {
-            if(!$eredmenyek->where('nev', $kotelezo)->count()) {
+        foreach ($requirements->getRequiredBaseSubjects() as $requiredBaseSubject) {
+            if (!$results->findByName($requiredBaseSubject->getName())) {
                 throw new RequiredSubjectCalculatorException(__('required_subject'));
             }
         }
 
-        $alappont = 0;
+        $basePoint = $this->calculateBasePoint($requirements, $results);
+        $optionalPoint = $this->calculateOptionalPoint($requirements, $results);
 
-        foreach ($targyak['kotelezo'] as $targy => $szint){
+        return 2 * ($basePoint + $optionalPoint);
+    }
 
-            $szintek = [];
-            $szintek[] = $szint;
-            if ($szint === 'közép') {
-                $szintek[] = 'emelt';
+    private function calculateBasePoint(RequirementsVO $requirements, SubjectVOCollection $results): int
+    {
+        $points = 0;
+
+        foreach ($requirements->getRequiredSubjects() as $requiredSubject) {
+
+            $levels = new SubjectLevelEnumerationCollection($requiredSubject->getLevel());
+            if ($requiredSubject->getLevel() === SubjectLevel::INTERMEDIATE) {
+                $levels->add(SubjectLevel::ADVANCED);
             }
 
-            if(!$eredmenyek->where('nev', $targy)->whereIn('tipus', $szintek)->count()) {
+            $subject = $this->subjectRepository->getById($requiredSubject->getSubjectId());
+
+            $currentSubject = $results->findByNameAndLevels($subject->getName(), $levels);
+            if (!$currentSubject) {
                 throw new RequiredSubjectCalculatorException(__('required_subject'));
             }
 
-            $alappont += (int) ($eredmenyek->where('nev', $targy)->whereIn('tipus', $szintek)->first()->eredmeny);
-
+            $points += $currentSubject->getPercent();
         }
 
-        $vanLegalabbEgyValasztott = false;
-        $legjobb = 0;
-        foreach ($targyak['kotelezoen_valaszthato'] as $targy => $szint){
+        return $points;
+    }
 
-            $szintek = [];
-            $szintek[] = $szint;
-            if ($szint === 'közép') {
-                $szintek[] = 'emelt';
+    /**
+     * @throws RequiredSubjectCalculatorException
+     */
+    private function calculateOptionalPoint(RequirementsVO $requirements, SubjectVOCollection $results): int
+    {
+        $hasOneOptional = false;
+        $best = 0;
+
+        foreach ($requirements->getOptionalSubjects() as $optionalSubject) {
+            $levels = new SubjectLevelEnumerationCollection($optionalSubject->getLevel());
+            if ($optionalSubject->getLevel() === SubjectLevel::INTERMEDIATE) {
+                $levels->add(SubjectLevel::ADVANCED);
             }
 
-            if($eredmenyek->where('nev', $targy)->whereIn('tipus', $szintek)->count()) {
-                $vanLegalabbEgyValasztott = true;
+            $subject = $this->subjectRepository->getById($optionalSubject->getSubjectId());
+
+            $currentSubject = $results->findByNameAndLevels($subject->getName(), $levels);
+            if (!$currentSubject) {
+                continue;
             }
 
-            $tmpEredmeny = $eredmenyek->where('nev', $targy)->whereIn('tipus', $szintek)->first();
-            if ($tmpEredmeny?->eredmeny && (int) $tmpEredmeny?->eredmeny > $legjobb) {
-                $legjobb = (int) $tmpEredmeny?->eredmeny;
+            $hasOneOptional = true;
+
+            if ($currentSubject->getPercent() > $best) {
+                $best = $currentSubject->getPercent();
             }
         }
 
-        if (!$vanLegalabbEgyValasztott) {
+        if (!$hasOneOptional) {
             throw new RequiredSubjectCalculatorException(__('required_optional_subject'));
         }
 
-        return 2 * ($alappont + $legjobb);
+        return $best;
     }
 }

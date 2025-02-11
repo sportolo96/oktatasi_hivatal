@@ -2,7 +2,9 @@
 
 namespace App\Services\PointCalculator;
 
+use App\ValueObject\Input\InputVO;
+
 interface PointCalculatorInterface
 {
-    public function calculate(array $data): int;
+    public function calculate(InputVO $input): int;
 }

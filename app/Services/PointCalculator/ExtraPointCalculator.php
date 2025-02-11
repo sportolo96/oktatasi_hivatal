@@ -2,55 +2,59 @@
 
 namespace App\Services\PointCalculator;
 
-final readonly class ExtraPointCalculator extends AbstractPointCalculator
+use App\Collection\Language\LanguageExamVOCollection;
+use App\Enumerations\LanguageExamLevel;
+use App\Enumerations\SubjectLevel;
+use App\ValueObject\Input\InputVO;
+
+final readonly class ExtraPointCalculator implements PointCalculatorInterface
 {
-    public function calculate(array $data): int
+    const ADVANCED_LEVEL_POINT = 50;
+    const LANGUAGE_B2_POINT = 28;
+    const LANGUAGE_C1_POINT = 40;
+
+    public function calculate(InputVO $input): int
     {
-        $results = json_encode($data['erettsegi-eredmenyek']);
-        $results = json_decode($results);
+        $results = $input->getResult()?->getResult();
 
-        $eredmenyek = collect($results, true);
+        $extras = $input->getExtraPoint();
 
-        $results = json_encode($data['tobbletpontok']);
-        $results = json_decode($results);
+        $point = 0;
 
-        $tobbletpontok = collect($results, true);
-
-        $pontok = 0;
-
-        foreach ($eredmenyek as $eredmeny) {
-            if( $eredmeny->tipus === 'emelt') {
-                $pontok += 50;
+        foreach ($results as $result) {
+            if ($result->getLevel() === SubjectLevel::ADVANCED) {
+                $point += self::ADVANCED_LEVEL_POINT;
 
                 break;
             }
         }
 
-        $addedCategories = collect([]);
+        $checkedLanguageExams = new LanguageExamVOCollection();
 
-        foreach ($tobbletpontok as $tobbletpont) {
-            if ($addedCategories->where('kategoria', $tobbletpont->kategoria)->where('tipus', $tobbletpont->tipus)->where('nyelv', $tobbletpont->nyelv)->count()) {
+        foreach ($extras?->getLanguageExam() as $languageExam) {
+            if ($checkedLanguageExams->findByLanguageAndLevels($languageExam->getLanguage(), $languageExam->getLevel())) {
                 continue;
             }
 
-            if($tobbletpont->kategoria === 'Nyelvvizsga') {
-                $addedCategories->push($tobbletpont);
-                switch($tobbletpont->tipus) {
-                    case 'B2':
-                        $pontok += 28;
-                        break;
-                    case 'C1':
-                        if ($addedCategories->where('kategoria', $tobbletpont->kategoria)->where('tipus', 'B2')->where('nyelv', $tobbletpont->nyelv)->count()) {
-                            $pontok -= 28;
-                        }
-                        $pontok += 40;
-                        break;
-                };
-            }
+            $checkedLanguageExams->add($languageExam);
+            switch ($languageExam->getLevel()) {
+
+                case LanguageExamLevel::B2:
+                    $point += self::LANGUAGE_B2_POINT;
+                    break;
+
+                case LanguageExamLevel::C1:
+                    if ($checkedLanguageExams->findByLanguageAndLevels($languageExam->getLanguage(), LanguageExamLevel::B2)) {
+                        $point -= self::LANGUAGE_B2_POINT;
+                    }
+
+                    $point += self::LANGUAGE_C1_POINT;
+                    break;
+            };
+
         }
 
 
-
-        return ($pontok <= 100) ? $pontok : 100;
+        return ($point <= 100) ? $point : 100;
     }
 }

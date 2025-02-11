@@ -2,16 +2,18 @@
 
 namespace Tests\Unit;
 
+use App\Exceptions\AbstractCalculatorException;
 use App\Exceptions\NotEnoughPerCentCalculatorException;
 use App\Exceptions\RequiredSubjectCalculatorException;
 use App\Services\PointCalculator\BasePointCalculator;
-use App\Services\PointCalculator\ExtraPointCalculator;
+use App\ValueObject\Input\InputVO;
 use Tests\TestCase;
 
 class BasePointCalculatorTest extends TestCase
 {
     /**
      * Test the base point calculation.
+     * @throws AbstractCalculatorException|\Exception
      */
     public function test_correct_base_point_calculator(): void
     {
@@ -51,12 +53,15 @@ class BasePointCalculatorTest extends TestCase
         ];
 
         $calculator = new BasePointCalculator();
-        $result = $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $result = $calculator->calculate($input);
+
         $this->assertEquals(370, $result);
     }
 
     /**
      * Test the base point calculation.
+     * @throws AbstractCalculatorException|\Exception
      */
     public function test_other_correct_base_point_calculator(): void
     {
@@ -101,14 +106,16 @@ class BasePointCalculatorTest extends TestCase
         ];
 
         $calculator = new BasePointCalculator();
-        $result = $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $result = $calculator->calculate($input);
+
         $this->assertEquals(376, $result);
     }
 
 
     /**
      * Test the base point calculation.
-     * @throws \Exception
+     * @throws AbstractCalculatorException|\Exception
      */
     public function test_incorrect_base_point_calculator(): void
     {
@@ -139,12 +146,13 @@ class BasePointCalculatorTest extends TestCase
 
         $calculator = new BasePointCalculator();
         $this->expectException(RequiredSubjectCalculatorException::class);
-        $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $calculator->calculate($input);
     }
 
     /**
      * Test the base point calculation.
-     * @throws \Exception
+     * @throws AbstractCalculatorException|\Exception
      */
     public function test_other_incorrect_base_point_calculator(): void
     {
@@ -185,12 +193,13 @@ class BasePointCalculatorTest extends TestCase
 
         $calculator = new BasePointCalculator();
         $this->expectException(RequiredSubjectCalculatorException::class);
-        $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $calculator->calculate($input);
     }
 
     /**
      * Test the base point calculation.
-     * @throws \Exception
+     * @throws AbstractCalculatorException|\Exception
      */
     public function test_not_enough_point_base_point_calculator(): void
     {
@@ -231,6 +240,7 @@ class BasePointCalculatorTest extends TestCase
 
         $calculator = new BasePointCalculator();
         $this->expectException(NotEnoughPerCentCalculatorException::class);
-        $calculator->calculate($exampleData);
+        $input = InputVO::create($exampleData);
+        $calculator->calculate($input);
     }
 }
