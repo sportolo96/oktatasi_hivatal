@@ -20,7 +20,7 @@ final readonly class MajorSubjectRepository extends BaseRepository
 
     public function getById(int $id): MajorSubjectEntity
     {
-        return $this->majorSubjectTransformer->toEntity(MajorSubject::find($id));
+        return $this->majorSubjectTransformer->toEntity(MajorSubject::firstOrFail($id));
     }
 
     public function getAllByMajorIdAndSubjectId(int $majorId, int $subjectId): MajorSubjectEntityCollection

@@ -19,17 +19,17 @@ final readonly class InstitutionRepository extends BaseRepository
 
     public function getById(int $id): InstitutionEntity
     {
-        return $this->institutionTransformer->toEntity(Institution::find($id));
+        return $this->institutionTransformer->toEntity(Institution::findOrFail($id));
     }
 
     public function getByName(string $name): InstitutionEntity
     {
-        return $this->institutionTransformer->toEntity(Institution::where('name', $name)->first());
+        return $this->institutionTransformer->toEntity(Institution::where('name', $name)->firstOrFail());
     }
 
     public function getByNameAndUniversityId(string $name, int $universityId): InstitutionEntity
     {
-        return $this->institutionTransformer->toEntity(Institution::where('name', $name)->where('university_id', $universityId)->first());
+        return $this->institutionTransformer->toEntity(Institution::where('name', $name)->where('university_id', $universityId)->firstOrFail());
     }
 
     public function save(UniversityEntity|BaseEntity $entity): InstitutionEntity

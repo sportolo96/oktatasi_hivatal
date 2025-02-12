@@ -30,6 +30,6 @@ class CalculatorController extends Controller
             ], 409);
         }
 
-        return response()->json($point);
+        return response()->json(['osszpontszam' => $point]);
     }
 }

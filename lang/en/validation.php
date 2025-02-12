@@ -204,7 +204,7 @@ return [
     ],
     'tobbletpontok' => [
         '*.kategoria' => [
-            'in' => 'Only the "Nyelvvizsga" category is allowed.',
+            'in' => 'Only the following :categories is allowed as extra points categories.',
         ],
         '*.tipus' => [
             'in' => 'The language exam type must be one of the following: :languages.',

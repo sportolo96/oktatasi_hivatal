@@ -18,12 +18,12 @@ final readonly class UniversityRepository extends BaseRepository
 
     public function getById(int $id): UniversityEntity
     {
-        return $this->universityTransformer->toEntity(University::find($id));
+        return $this->universityTransformer->toEntity(University::findOrFail($id));
     }
 
     public function getByName(string $name): UniversityEntity
     {
-        return $this->universityTransformer->toEntity(University::where('name', $name)->first());
+        return $this->universityTransformer->toEntity(University::where('name', $name)->firstOrFail());
     }
 
     public function save(UniversityEntity|BaseEntity $entity): UniversityEntity

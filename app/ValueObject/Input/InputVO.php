@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\ValueObject\Input;
 
+use App\Exceptions\InvalidDataException;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 final readonly class InputVO
 {
     public function __construct(
@@ -14,17 +18,28 @@ final readonly class InputVO
     {
     }
 
+    /**
+     * @throws InvalidDataException
+     */
     public static function create(array $data): self
     {
-        $selectedMajor = $data['valasztott-szak'];
-        $result = $data['erettsegi-eredmenyek'];
-        $extraPoint = $data['tobbletpontok'] ?? null;
+        try {
+            $selectedMajor = $data['valasztott-szak'];
+            $result = $data['erettsegi-eredmenyek'];
+            $extraPoint = $data['tobbletpontok'] ?? null;
 
-        return new self(
-            SelectedMajorVO::create($selectedMajor),
-            ResultVO::create($result),
-            $extraPoint ? ExtraPointVO::create($extraPoint) : null
-        );
+            $InputVO = new self(
+                SelectedMajorVO::create($selectedMajor),
+                ResultVO::create($result),
+                $extraPoint ? ExtraPointVO::create($extraPoint) : null
+            );
+
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+            throw new InvalidDataException(__('exception.invalid_inputs'));
+        }
+
+        return $InputVO;
     }
 
     public function getSelectedMajor(): SelectedMajorVO

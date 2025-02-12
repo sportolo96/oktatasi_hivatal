@@ -31,7 +31,11 @@ final readonly class ExtraPointCalculator implements PointCalculatorInterface
 
         $checkedLanguageExams = new LanguageExamVOCollection();
 
-        foreach ($extras?->getLanguageExam() as $languageExam) {
+        if (!$extras) {
+            return $this->checkFinalPoint($point);
+        }
+
+        foreach ($extras->getLanguageExam() as $languageExam) {
             if ($checkedLanguageExams->findByLanguageAndLevels($languageExam->getLanguage(), $languageExam->getLevel())) {
                 continue;
             }
@@ -55,6 +59,10 @@ final readonly class ExtraPointCalculator implements PointCalculatorInterface
         }
 
 
+        return $this->checkFinalPoint($point);
+    }
+
+    private function checkFinalPoint(int $point): int {
         return ($point <= 100) ? $point : 100;
     }
 }

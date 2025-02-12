@@ -18,17 +18,17 @@ final readonly class MajorRepository extends BaseRepository
 
     public function getById(int $id): MajorEntity
     {
-        return $this->majorTransformer->toEntity(Major::find($id));
+        return $this->majorTransformer->toEntity(Major::findOrFail($id));
     }
 
     public function getByName(string $name): MajorEntity
     {
-        return $this->majorTransformer->toEntity(Major::where('name', $name)->first());
+        return $this->majorTransformer->toEntity(Major::where('name', $name)->firstOrFail());
     }
 
     public function getByNameAndInstitutionId(string $name, int $institutionId): MajorEntity
     {
-        return $this->majorTransformer->toEntity(Major::where('name', $name)->where('institution_id', $institutionId)->first());
+        return $this->majorTransformer->toEntity(Major::where('name', $name)->where('institution_id', $institutionId)->firstOrFail());
     }
 
     public function save(MajorEntity|BaseEntity $entity): MajorEntity

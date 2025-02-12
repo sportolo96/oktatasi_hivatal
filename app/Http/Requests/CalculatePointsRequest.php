@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enumerations\ExtraPointType;
 use App\Enumerations\LanguageExamLevel;
 use App\Enumerations\SubjectLevel;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -11,11 +12,13 @@ class CalculatePointsRequest extends FormRequest
 {
     private string $subjectTypes;
     private string $languageExamTypes;
+    private string $extraPointType;
 
     public function __construct(array $query = [], array $request = [], array $attributes = [], array $cookies = [], array $files = [], array $server = [], $content = null)
     {
         $this->subjectTypes = implode(',', array_map(fn($case) => $case->value, SubjectLevel::cases()));
         $this->languageExamTypes = implode(',', array_map(fn($case) => $case->value, LanguageExamLevel::cases()));
+        $this->extraPointType = implode(',', array_map(fn($case) => $case->value, ExtraPointType::cases()));
 
         parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
     }
@@ -25,7 +28,7 @@ class CalculatePointsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -46,7 +49,7 @@ class CalculatePointsRequest extends FormRequest
             'erettsegi-eredmenyek.*.eredmeny' => ['required', 'regex:/^\d{1,3}%$/'],
 
             'tobbletpontok' => ['nullable', 'array'],
-            'tobbletpontok.*.kategoria' => ['required_with:tobbletpontok', 'string', "in:Nyelvvizsga"],
+            'tobbletpontok.*.kategoria' => ['required_with:tobbletpontok', 'string', "in:{$this->extraPointType}"],
             'tobbletpontok.*.tipus' => ['required_with:tobbletpontok', 'string', "in:{$this->languageExamTypes}"],
             'tobbletpontok.*.nyelv' => ['required_with:tobbletpontok', 'string'],
         ];
@@ -56,9 +59,9 @@ class CalculatePointsRequest extends FormRequest
     {
         return [
             'valasztott-szak.egyetem.required' => __('validation.valasztott-szak.egyetem.required'),
-            'erettsegi-eredmenyek.*.eredmeny.regex' => __('validation.erettsegi-eredmenyek.*.eredmeny.regex'),
-            'tobbletpontok.*.kategoria.in' => __('validation.tobbletpontok.*.kategoria.in'),
-            'tobbletpontok.*.tipus.in' => __('validation.tobbletpontok.*.tipus.in', ['languages' => $this->languageExamTypes]),
+            'erettsegi-eredmenyek.*.eredmeny.regex' => __('validation.erettsegi-eredmenyek.eredmeny.regex'),
+            'tobbletpontok.*.kategoria.in' => __('validation.tobbletpontok.kategoria.in', ['categories' => $this->extraPointType]),
+            'tobbletpontok.*.tipus.in' => __('validation.tobbletpontok.tipus.in', ['languages' => $this->languageExamTypes]),
         ];
     }
 }

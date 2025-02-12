@@ -37,13 +37,13 @@ final readonly class BasePointCalculator implements PointCalculatorInterface
 
         foreach ($results as $subject) {
             if ($subject->getPercent() < 20) {
-                throw new NotEnoughPerCentCalculatorException(__('not_enough_per_cent_in_subject'));
+                throw new NotEnoughPerCentCalculatorException(__('exception.not_enough_per_cent_in_subject', ['subject' => $subject->getName()]));
             }
         }
 
         foreach ($requirements->getRequiredBaseSubjects() as $requiredBaseSubject) {
             if (!$results->findByName($requiredBaseSubject->getName())) {
-                throw new RequiredSubjectCalculatorException(__('required_subject'));
+                throw new RequiredSubjectCalculatorException(__('exception.required_subject'));
             }
         }
 
@@ -53,10 +53,12 @@ final readonly class BasePointCalculator implements PointCalculatorInterface
         return 2 * ($basePoint + $optionalPoint);
     }
 
+    /**
+     * @throws RequiredSubjectCalculatorException
+     */
     private function calculateBasePoint(RequirementsVO $requirements, SubjectVOCollection $results): int
     {
         $points = 0;
-
         foreach ($requirements->getRequiredSubjects() as $requiredSubject) {
 
             $levels = new SubjectLevelEnumerationCollection($requiredSubject->getLevel());
@@ -68,7 +70,7 @@ final readonly class BasePointCalculator implements PointCalculatorInterface
 
             $currentSubject = $results->findByNameAndLevels($subject->getName(), $levels);
             if (!$currentSubject) {
-                throw new RequiredSubjectCalculatorException(__('required_subject'));
+                throw new RequiredSubjectCalculatorException(__('exception.required_subject'));
             }
 
             $points += $currentSubject->getPercent();

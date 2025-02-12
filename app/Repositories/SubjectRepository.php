@@ -20,12 +20,12 @@ final readonly class SubjectRepository extends BaseRepository
 
     public function getById(int $id): SubjectEntity
     {
-        return $this->subjectTransformer->toEntity(Subject::find($id));
+        return $this->subjectTransformer->toEntity(Subject::findOrFail($id));
     }
 
     public function getByName(string $name): SubjectEntity
     {
-        return $this->subjectTransformer->toEntity(Subject::where('name', $name)->first());
+        return $this->subjectTransformer->toEntity(Subject::where('name', $name)->firstOrFail());
     }
 
     public function getAllByType(SubjectType $type): SubjectEntityCollection
