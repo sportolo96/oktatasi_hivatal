@@ -17,7 +17,7 @@ final readonly class PointCalculator implements PointCalculatorInterface
     }
 
     /**
-     * @throws AbstractCalculatorException|\Exception
+     * @throws AbstractCalculatorException
      */
     public function calculate(InputVO $input): int
     {

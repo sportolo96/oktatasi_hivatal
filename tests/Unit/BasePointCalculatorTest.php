@@ -13,7 +13,7 @@ class BasePointCalculatorTest extends TestCase
 {
     /**
      * Test the base point calculation.
-     * @throws AbstractCalculatorException|\Exception
+     * @throws AbstractCalculatorException
      */
     public function test_correct_base_point_calculator(): void
     {
@@ -61,7 +61,7 @@ class BasePointCalculatorTest extends TestCase
 
     /**
      * Test the base point calculation.
-     * @throws AbstractCalculatorException|\Exception
+     * @throws AbstractCalculatorException
      */
     public function test_other_correct_base_point_calculator(): void
     {
@@ -115,7 +115,7 @@ class BasePointCalculatorTest extends TestCase
 
     /**
      * Test the base point calculation.
-     * @throws AbstractCalculatorException|\Exception
+     * @throws AbstractCalculatorException
      */
     public function test_incorrect_base_point_calculator(): void
     {
@@ -152,7 +152,7 @@ class BasePointCalculatorTest extends TestCase
 
     /**
      * Test the base point calculation.
-     * @throws AbstractCalculatorException|\Exception
+     * @throws AbstractCalculatorException
      */
     public function test_other_incorrect_base_point_calculator(): void
     {
@@ -199,7 +199,7 @@ class BasePointCalculatorTest extends TestCase
 
     /**
      * Test the base point calculation.
-     * @throws AbstractCalculatorException|\Exception
+     * @throws AbstractCalculatorException
      */
     public function test_not_enough_point_base_point_calculator(): void
     {
